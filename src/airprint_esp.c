@@ -119,6 +119,10 @@ static int job_sync(void *ctx, const char *what)
 
 static void job_close(void *ctx, bool ok)
 {
+    // send what is still buffered: a driver without an "EndJob" sync (Kyocera)
+    // would lose its last bytes, or its whole job when it is smaller than a buffer
+    if (ok)
+        usb_printer_flush();
     esp_timer_stop(s_cancel_timer);
     usb_printer_job_end();
     s_job_running = false;
